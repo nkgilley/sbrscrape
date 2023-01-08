@@ -7,7 +7,7 @@ from sbrscrape import Scoreboard
 games = Scoreboard(sport="NFL").games
 games[0]
 {
-    "epoch": "2023-01-08T18:00:00+00:00",
+    "date": "2023-01-08T18:00:00+00:00",
     "status": "13:00 ET",
     "home_team": "Atlanta Falcons",
     "home_team_loc": "Atlanta",

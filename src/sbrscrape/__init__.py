@@ -29,7 +29,7 @@ def scrape_games(sport="NBA", date="", current_line=True):
     games = []
     for event in all_stats:
         game = {}
-        game['epoch'] = event['gameView']['startDate']
+        game['date'] = event['gameView']['startDate']
         game['status'] = event['gameView']['gameStatusText']
         game['home_team'] = event['gameView']['homeTeam']['fullName']
         game['home_team_loc'] = event['gameView']['homeTeam']['displayName']
