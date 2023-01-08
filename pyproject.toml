@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0", "requests"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sbrscrape"
+version = "0.0.1"
+authors = [
+  { name="Nolan Gilley", email="nkgilley@gmail.com" },
+]
+description = "Scrape odds data from sbrodds"
+readme = "README.md"
+requires-python = ">=3.5"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/nkgilley/sbrscrape"
+"Bug Tracker" = "https://github.com/nkgilley/sbrscrape/issues"
