@@ -11,9 +11,9 @@ def scrape_games(sport="NBA", date="", current_line=True):
     if date == "":
         date = datetime.today().strftime("%Y-%m-%d")
     _line = 'currentLine' if current_line else 'openingLine'
-    spread_url = f"https://www.sportsbookreview.com/_next/data/lvqyIHzLaFraGFTybxNeO/betting-odds/{sport_dict[sport]}.json?date={date}&league={sport_dict[sport]}"
-    moneyline_url = f"https://www.sportsbookreview.com/_next/data/lvqyIHzLaFraGFTybxNeO/betting-odds/{sport_dict[sport]}/money-line/full-game.json?date={date}&league={sport_dict[sport]}&oddsType=money-line&oddsScope=full-game"
-    totals_url = f"https://www.sportsbookreview.com/_next/data/lvqyIHzLaFraGFTybxNeO/betting-odds/{sport_dict[sport]}/totals/full-game.json?date={date}&league={sport_dict[sport]}&oddsType=totals&oddsScope=full-game"
+    spread_url = f"https://www.sportsbookreview.com/_next/data/2lKvvWPGtRV9T-kYuxlIT/betting-odds/{sport_dict[sport]}.json?date={date}&league={sport_dict[sport]}"
+    moneyline_url = f"https://www.sportsbookreview.com/_next/data/2lKvvWPGtRV9T-kYuxlIT/betting-odds/{sport_dict[sport]}/money-line/full-game.json?date={date}&league={sport_dict[sport]}&oddsType=money-line&oddsScope=full-game"
+    totals_url = f"https://www.sportsbookreview.com/_next/data/2lKvvWPGtRV9T-kYuxlIT/betting-odds/{sport_dict[sport]}/totals/full-game.json?date={date}&league={sport_dict[sport]}&oddsType=totals&oddsScope=full-game"
     spread_request = requests.get(spread_url)
     moneyline_request = requests.get(moneyline_url)
     totals_request = requests.get(totals_url)
