@@ -19,20 +19,26 @@ def scrape_games(sport="NBA", date="", current_line=True):
     spread_url = f"https://www.sportsbookreview.com/betting-odds/{sport_dict[sport]}/?date={date}"
     r = requests.get(spread_url)
     j = re.findall('__NEXT_DATA__" type="application/json">(.*?)</script>',r.text)
-    if len(j) > 0:
+    try:
         spreads = json.loads(j[0])['props']['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
+    except IndexError:
+        return []
 
     moneyline_url = f"https://www.sportsbookreview.com/betting-odds/{sport_dict[sport]}/money-line/full-game/?date={date}"
     r = requests.get(moneyline_url)
     j = re.findall('__NEXT_DATA__" type="application/json">(.*?)</script>',r.text)
-    if len(j) > 0:
+    try:
         moneylines = json.loads(j[0])['props']['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
+    except IndexError:
+        return []
 
     totals_url = f"https://www.sportsbookreview.com/betting-odds/{sport_dict[sport]}/totals/full-game/?date={date}"
     r = requests.get(totals_url)
     j = re.findall('__NEXT_DATA__" type="application/json">(.*?)</script>',r.text)
-    if len(j) > 0:
+    try:
         totals = json.loads(j[0])['props']['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
+    except IndexError:
+        return []
 
     all_stats = []
     for idx, game in enumerate(spreads):
@@ -95,4 +101,4 @@ class Scoreboard:
             self.games = scrape_games(sport, date, sportsbook)
         except Exception as e:
             print("An error occurred: {}".format(e))
-            return
+            self.games = []
