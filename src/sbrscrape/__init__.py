@@ -15,30 +15,25 @@ def scrape_games(sport="NBA", date="", current_line=True):
     _line = 'currentLine' if current_line else 'openingLine'
 
     spreads = moneylines = totals = []
-  
+    
     spread_url = f"https://www.sportsbookreview.com/betting-odds/{sport_dict[sport]}/?date={date}"
     r = requests.get(spread_url)
     j = re.findall('__NEXT_DATA__" type="application/json">(.*?)</script>',r.text)
     try:
-        spreads = json.loads(j[0])['props']['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
+        build_id = json.loads(j[0])['buildId']
+        spreads_url = f"https://www.sportsbookreview.com/_next/data/{build_id}/betting-odds/{sport_dict[sport]}.json?league={sport_dict[sport]}"
+        spreads_json = requests.get(spreads_url).json()
+        spreads = spreads_json['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
     except IndexError:
         return []
 
-    moneyline_url = f"https://www.sportsbookreview.com/betting-odds/{sport_dict[sport]}/money-line/full-game/?date={date}"
-    r = requests.get(moneyline_url)
-    j = re.findall('__NEXT_DATA__" type="application/json">(.*?)</script>',r.text)
-    try:
-        moneylines = json.loads(j[0])['props']['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
-    except IndexError:
-        return []
+    moneyline_url = f"https://www.sportsbookreview.com/_next/data/{build_id}/betting-odds/{sport_dict[sport]}/money-line/full-game.json?league={sport_dict[sport]}&oddsType=money-line&oddsScope=full-game"
+    moneyline_json = requests.get(moneyline_url).json()
+    moneylines = moneyline_json['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
 
-    totals_url = f"https://www.sportsbookreview.com/betting-odds/{sport_dict[sport]}/totals/full-game/?date={date}"
-    r = requests.get(totals_url)
-    j = re.findall('__NEXT_DATA__" type="application/json">(.*?)</script>',r.text)
-    try:
-        totals = json.loads(j[0])['props']['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
-    except IndexError:
-        return []
+    totals_url = f"https://www.sportsbookreview.com/_next/data/{build_id}/betting-odds/{sport_dict[sport]}/totals/full-game.json?league={sport_dict[sport]}&oddsType=totals&oddsScope=full-game"
+    totals_json = requests.get(moneyline_url).json()
+    totals = moneyline_json['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
 
     all_stats = []
     for idx, game in enumerate(spreads):
