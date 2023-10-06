@@ -29,17 +29,17 @@ class Scoreboard:
         j = re.findall('__NEXT_DATA__" type="application/json">(.*?)</script>',r.text)
         try:
             build_id = json.loads(j[0])['buildId']
-            spreads_url = f"https://www.sportsbookreview.com/_next/data/{build_id}/betting-odds/{sport_dict[sport]}.json?league={sport_dict[sport]}"
+            spreads_url = f"https://www.sportsbookreview.com/_next/data/{build_id}/betting-odds/{sport_dict[sport]}.json?league={sport_dict[sport]}&date={date}"
             spreads_json = requests.get(spreads_url).json()
             spreads = spreads_json['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
         except IndexError:
             return []
 
-        moneyline_url = f"https://www.sportsbookreview.com/_next/data/{build_id}/betting-odds/{sport_dict[sport]}/money-line/full-game.json?league={sport_dict[sport]}&oddsType=money-line&oddsScope=full-game"
+        moneyline_url = f"https://www.sportsbookreview.com/_next/data/{build_id}/betting-odds/{sport_dict[sport]}/money-line/full-game.json?league={sport_dict[sport]}&oddsType=money-line&oddsScope=full-game&date={date}"
         moneyline_json = requests.get(moneyline_url).json()
         moneylines = moneyline_json['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
 
-        totals_url = f"https://www.sportsbookreview.com/_next/data/{build_id}/betting-odds/{sport_dict[sport]}/totals/full-game.json?league={sport_dict[sport]}&oddsType=totals&oddsScope=full-game"
+        totals_url = f"https://www.sportsbookreview.com/_next/data/{build_id}/betting-odds/{sport_dict[sport]}/totals/full-game.json?league={sport_dict[sport]}&oddsType=totals&oddsScope=full-game&date={date}"
         totals_json = requests.get(totals_url).json()
         totals = totals_json['pageProps']['oddsTables'][0]['oddsTableModel']['gameRows']
 
