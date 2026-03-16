@@ -106,7 +106,7 @@ games[0]
 ## Build
 ```
 python3 -m build
-twine upload dist/sbrscrape-0.0.10*
+twine upload dist/sbrscrape-0.0.*
 
 user: __token__
 password: check pypi-token file
