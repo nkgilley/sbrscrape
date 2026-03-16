@@ -65,12 +65,11 @@ class Scoreboard:
             # print(f"SBR scraping failed: {e}")
             pass
             
-        if not self.games:
-            try:
-                self.scrape_oddstrader(sport, date)
-            except Exception as e:
-                # print(f"Oddstrader scraping failed: {e}")
-                pass
+        try:
+            self.scrape_oddstrader(sport, date)
+        except Exception as e:
+            # print(f"Oddstrader scraping failed: {e}")
+            pass
 
     def scrape_games(self, sport="NBA", date="", current_line=True):
         if date == "":
@@ -130,8 +129,22 @@ class Scoreboard:
             game['away_team_loc'] = event['spreads']['gameView']['awayTeam']['displayName']
             game['away_team_abbr'] = event['spreads']['gameView']['awayTeam']['shortName']
             game['away_team_rank'] = event['spreads']['gameView']['awayTeam']['rank']
-            game['home_score'] = event['spreads']['gameView']['homeTeamScore']
-            game['away_score'] = event['spreads']['gameView']['awayTeamScore']
+            
+            home_score = event['spreads']['gameView']['homeTeamScore']
+            away_score = event['spreads']['gameView']['awayTeamScore']
+            if event['spreads'].get('liveScoreViews') and event['spreads']['liveScoreViews'].get('viewdata'):
+                score_data = event['spreads']['liveScoreViews']['viewdata'].get('GameTeamScoreDataList')
+                if score_data:
+                    home_score = 0
+                    away_score = 0
+                    for s in score_data:
+                        if s['isHomeTeam']:
+                            home_score += s['Points']
+                        else:
+                            away_score += s['Points']
+            
+            game['home_score'] = home_score
+            game['away_score'] = away_score
             game['home_spread'] = {}
             game['home_spread_odds'] = {}
             game['away_spread'] = {}
@@ -190,7 +203,7 @@ class Scoreboard:
         data = r.json()
         events = data['data']['eventsByDateByLeagueGroup']['events']
         
-        games = []
+        new_games = []
         for event in events:
             game = {}
             game['source'] = 'oddstrader'
@@ -271,5 +284,50 @@ class Scoreboard:
                 if time_val != "" and qtr != "":
                     game['status'] = qtr + ' ' + time_val
 
-            games.append(game)
-        self.games = games
+            # Merge with existing games from SBR if possible
+            found = False
+            for existing_game in self.games:
+                def normalize(name):
+                    return name.lower().replace('.', '').replace(' ', '').replace('losangeles', 'la').replace('stlouis', 'stl')
+                
+                ot_home = normalize(game['home_team'])
+                sbr_home = normalize(existing_game['home_team'])
+                ot_away = normalize(game['away_team'])
+                sbr_away = normalize(existing_game['away_team'])
+                
+                if (ot_home in sbr_home or sbr_home in ot_home) and \
+                   (ot_away in sbr_away or sbr_away in ot_away):
+                    # Prefer Oddstrader for status and scores if in-progress or final
+                    if game['status'] != 'scheduled' or existing_game['status'] == '':
+                        existing_game['status'] = game['status']
+                        existing_game['home_score'] = game['home_score']
+                        existing_game['away_score'] = game['away_score']
+                    
+                    # Also merge odds if not present in SBR game
+                    for book, val in game['home_spread'].items():
+                        if book not in existing_game['home_spread']:
+                            existing_game['home_spread'][book] = val
+                            existing_game['home_spread_odds'][book] = game['home_spread_odds'].get(book)
+                    for book, val in game['away_spread'].items():
+                        if book not in existing_game['away_spread']:
+                            existing_game['away_spread'][book] = val
+                            existing_game['away_spread_odds'][book] = game['away_spread_odds'].get(book)
+                    for book, val in game['total'].items():
+                        if book not in existing_game['total']:
+                            existing_game['total'][book] = val
+                            existing_game['under_odds'][book] = game['under_odds'].get(book)
+                            existing_game['over_odds'][book] = game['over_odds'].get(book)
+                    for book, val in game['home_ml'].items():
+                        if book not in existing_game['home_ml']:
+                            existing_game['home_ml'][book] = val
+                    for book, val in game['away_ml'].items():
+                        if book not in existing_game['away_ml']:
+                            existing_game['away_ml'][book] = val
+                    
+                    found = True
+                    break
+            
+            if not found:
+                new_games.append(game)
+        
+        self.games.extend(new_games)
