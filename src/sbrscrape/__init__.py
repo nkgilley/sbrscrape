@@ -62,13 +62,13 @@ class Scoreboard:
         try:
             self.scrape_games(sport, date, current_line)
         except Exception as e:
-            # print(f"SBR scraping failed: {e}")
+            print(f"SBR scraping failed: {e}")
             pass
             
         try:
             self.scrape_oddstrader(sport, date)
         except Exception as e:
-            # print(f"Oddstrader scraping failed: {e}")
+            print(f"Oddstrader scraping failed: {e}")
             pass
 
     def scrape_games(self, sport="NBA", date="", current_line=True):
@@ -116,11 +116,14 @@ class Scoreboard:
         }
 
         games = []
-        for event in all_stats.values():
+        for idx, event in enumerate(all_stats.values()):
+            # if idx == 0:
+            #     print(event['spreads']['gameView']['gameStatusText'])
             game = {}
             game['source'] = 'sportsbookreview'
             game['date'] = event['spreads']['gameView']['startDate']
             game['status'] = event['spreads']['gameView']['gameStatusText']
+            game['status'] = re.sub(r'(\d{1,2}:\d{2})\s(\d\w{2})', r'\2 \1', game['status'])
             game['home_team'] = event['spreads']['gameView']['homeTeam']['fullName']
             game['home_team_loc'] = event['spreads']['gameView']['homeTeam']['displayName']
             game['home_team_abbr'] = event['spreads']['gameView']['homeTeam']['shortName']
@@ -204,10 +207,13 @@ class Scoreboard:
         events = data['data']['eventsByDateByLeagueGroup']['events']
         
         new_games = []
-        for event in events:
+        for idx, event in enumerate(events):
             game = {}
             game['source'] = 'oddstrader'
             game['date'] = datetime.utcfromtimestamp(event['dt'] / 1000.0).strftime('%Y-%m-%dT%H:%M:%S+00:00')
+            # if idx == 0:
+            #     print(event)
+            #     print(event['es'])
             game['status'] = event['es']
             
             home_id = 0
@@ -297,9 +303,11 @@ class Scoreboard:
                 
                 if (ot_home in sbr_home or sbr_home in ot_home) and \
                    (ot_away in sbr_away or sbr_away in ot_away):
-                    # Prefer Oddstrader for status and scores if in-progress or final
-                    if game['status'] != 'scheduled' or existing_game['status'] == '':
+                    # Use oddstrader if no status
+                    # if game['status'] != 'scheduled' or existing_game['status'] == '':
+                    if 'status' not in existing_game:
                         existing_game['status'] = game['status']
+                    if 'away_score' not in existing_game or 'home_score' not in existing_game:
                         existing_game['home_score'] = game['home_score']
                         existing_game['away_score'] = game['away_score']
                     
