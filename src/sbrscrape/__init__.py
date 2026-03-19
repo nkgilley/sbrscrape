@@ -303,9 +303,9 @@ class Scoreboard:
                 
                 if (ot_home in sbr_home or sbr_home in ot_home) and \
                    (ot_away in sbr_away or sbr_away in ot_away):
-                    # Use oddstrader if no status
+                    # Use oddstrader if no status or in-progress
                     # if game['status'] != 'scheduled' or existing_game['status'] == '':
-                    if 'status' not in existing_game:
+                    if 'status' not in existing_game or existing_game['status'] == 'in-progress':
                         existing_game['status'] = game['status']
                     if 'away_score' not in existing_game or 'home_score' not in existing_game:
                         existing_game['home_score'] = game['home_score']
